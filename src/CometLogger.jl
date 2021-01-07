@@ -153,7 +153,7 @@ end
 
 process(lg::CLogger, name::AbstractString, obj::Real, step::Int) = log_metric(lg, name, obj; step=step)
 process(lg::CLogger, name::AbstractString, obj::Tuple{AbstractVector,AbstractVector}, step::Int) = log_curve(lg, name, obj...; step=step)
-process(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}, step::Int) = log_image(lg, name, obj; step=step)
+process(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}, step::Int) = log_image(lg, name, obj; step=step, copy_to_tmp=false)
 
 
 function CoreLogging.handle_message(lg::CLogger, level, message, _module, group,
