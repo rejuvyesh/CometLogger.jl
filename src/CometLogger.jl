@@ -55,6 +55,14 @@ function log_image(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Color
     lg.cexp.log_image(arr, name, step=step)
 end
 
+function log_image(lg::CLogger, name::AbstractString, obj::AbstractString; step=nothing)
+    if !ispath(obj)
+        @warn "$obj not a path to png"
+        return        
+    end
+    lg.cexp.log_image(obj, name, step=step)
+end
+
 # AbstractLogger interface
 # Kind of mimicking TensorBoardLogger.jl
 
