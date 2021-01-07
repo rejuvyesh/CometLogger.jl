@@ -2,6 +2,8 @@ module CometLogger
 
 export CLogger
 
+using ColorTypes
+
 using PyCall
 
 const comet = PyNULL()
@@ -11,7 +13,6 @@ function __init__()
 end
 
 using Base.CoreLogging: CoreLogging, AbstractLogger, LogLevel, Info, handle_message, shouldlog, min_enabled_level, catch_exceptions
-
 
 # CometLogger
 mutable struct CLogger <: AbstractLogger
@@ -47,8 +48,11 @@ function log_curve(lg::CLogger, name::AbstractString, x::AbstractVector, y::Abst
     lg.cexp.log_curve(name, x, y, overwrite=overwrite, step=step)
 end
 
-function log_image(lg::CLogger, name::AbstractString, obj; step=nothing)
-    # TODO
+
+function log_image(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}; step=nothing)
+    # TODO, handle grayscale?
+    arr = cat(red.(obj), green.(obj), blue.(obj); dims=3)
+    lg.cexp.log_image(arr, name, step=step)
 end
 
 # AbstractLogger interface
