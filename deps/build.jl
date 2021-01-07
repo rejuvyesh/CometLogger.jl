@@ -4,7 +4,7 @@ try
     pyimport("comet_ml")
 catch e
     try
-        run(`$(PyCall.pyprogramname) -m pip install comet_ml`)
+        run(`$(PyCall.pyprogramname) -m pip install setuptools comet_ml`)
     catch ee
         if !(typeof(ee) <: PyCall.PyError)
             rethrow(ee)
