@@ -31,14 +31,22 @@ increment_step!(lg::CLogger, Δ_Step) = lg.global_step += Δ_Step
 
 add_tag!(lg::CLogger, tag::String) = lg.cexp.add_tag(tag)
 
+"""
+    function log_metric(lg::CLogger, name::AbstractString, value::Real; step::Int=nothing, epoch::Int=nothing)
+"""
 function log_metric(lg::CLogger, name::AbstractString, value::Real; step=nothing, epoch=nothing)
     lg.cexp.log_metric(name, value, step=step, epoch=epoch)
 end
+
+const log_value = log_metric
 
 function log_parameter(lg::CLogger, name::AbstractString, value; step=nothing)
     lg.cexp.log_parameter(name, value, step=step)
 end
 
+"""
+    function log_metric(lg::CLogger, name::AbstractString, value::AbstractString; step::Int=nothing, epoch::Int=nothing)
+"""
 function log_text(lg::CLogger, name::AbstractString, value; step=noting, epoch=nothing)
     lg.cexp.log_text(name, value, step=step, epoch=epoch)
 end
@@ -48,7 +56,9 @@ function log_curve(lg::CLogger, name::AbstractString, x::AbstractVector, y::Abst
     lg.cexp.log_curve(name, x, y, overwrite=overwrite, step=step)
 end
 
-
+"""
+    function log_image(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}; step=nothing)
+"""
 function log_image(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}; step=nothing)
     # TODO, handle grayscale?
     arr = cat(red.(obj), green.(obj), blue.(obj); dims=3)
