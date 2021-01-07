@@ -3,11 +3,14 @@ uuid = "952f05d4-56a3-4431-900f-8abaa653b4db"
 authors = ["rejuvyesh <mail@rejuvyesh.com> and contributors"]
 version = "0.1.0"
 
-[extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+[deps]
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 
 [compat]
 julia = "1.5.3"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test"]
