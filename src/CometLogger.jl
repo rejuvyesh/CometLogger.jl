@@ -53,6 +53,10 @@ function log_parameter(lg::CLogger, name::AbstractString, value; step=nothing)
     lg.cexp.log_parameter(name, value, step=step)
 end
 
+function log_parameters(lg::CLogger, params::Dict{String,Any}; prefix=nothing, step=nothing)
+    lg.cexp.log_parameters(params, prefix=prefix, step=step)
+end
+
 """
     function log_text(lg::CLogger, name::AbstractString, value::AbstractString; step::Int=nothing, metadata::Dict{String,Any}=nothing)
 
