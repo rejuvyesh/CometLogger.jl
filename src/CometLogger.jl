@@ -1,15 +1,22 @@
 module CometLogger
 
-export CLogger
 
 using ColorTypes
-
 using PyCall
+using Requires
+
+export CLogger
 
 const comet = PyNULL()
 
 function __init__()
     copy!(comet, pyimport("comet_ml"))
+
+    @require Plots="91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
+        @require ImageIO="82e4d734-157c-48bb-816b-45c225c6df19" begin    
+            include("plots.jl")
+        end
+    end
 end
 
 using Base.CoreLogging: CoreLogging, AbstractLogger, LogLevel, Info, handle_message, shouldlog, min_enabled_level, catch_exceptions
@@ -33,6 +40,8 @@ add_tag!(lg::CLogger, tag::String) = lg.cexp.add_tag(tag)
 
 """
     function log_metric(lg::CLogger, name::AbstractString, value::Real; step::Int=nothing, epoch::Int=nothing)
+
+Logs general scalar metrics.        
 """
 function log_metric(lg::CLogger, name::AbstractString, value::Real; step=nothing, epoch=nothing)
     lg.cexp.log_metric(name, value, step=step, epoch=epoch)
@@ -45,33 +54,45 @@ function log_parameter(lg::CLogger, name::AbstractString, value; step=nothing)
 end
 
 """
-    function log_metric(lg::CLogger, name::AbstractString, value::AbstractString; step::Int=nothing, epoch::Int=nothing)
+    function log_text(lg::CLogger, name::AbstractString, value::AbstractString; step::Int=nothing, metadata::Dict{String,Any}=nothing)
+
+Logs the text. 
 """
-function log_text(lg::CLogger, name::AbstractString, value; step=noting, epoch=nothing)
-    lg.cexp.log_text(name, value, step=step, epoch=epoch)
+function log_text(lg::CLogger, name::AbstractString, value; step=noting, metadata=nothing)
+    lg.cexp.log_text(name, value, step=step, metadata=metadata)
 end
 
+"""
+"""
 function log_curve(lg::CLogger, name::AbstractString, x::AbstractVector, y::AbstractVector; overwrite=false, step=nothing)
     @assert length(x) == length(y)
     lg.cexp.log_curve(name, x, y, overwrite=overwrite, step=step)
 end
 
 """
-    function log_image(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}; step=nothing)
+    function log_image(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}; step=nothing, kwargs...)
+
+Logs the image from an RGB array.
 """
-function log_image(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}; step=nothing)
+function log_image(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}; step=nothing, kwargs...)
     # TODO, handle grayscale?
     arr = cat(red.(obj), green.(obj), blue.(obj); dims=3)
-    lg.cexp.log_image(arr, name, step=step)
+    lg.cexp.log_image(arr, name, step=step, kwargs...)
 end
 
-function log_image(lg::CLogger, name::AbstractString, obj::AbstractString; step=nothing)
+"""
+    function log_image(lg::CLogger, name::AbstractString, obj::AbstractString; step=nothing, kwargs...)
+        
+Logs the image from a filepath.
+"""
+function log_image(lg::CLogger, name::AbstractString, obj::AbstractString; step=nothing, kwargs...)
     if !ispath(obj)
         @warn "$obj not a path to png"
         return        
     end
-    lg.cexp.log_image(obj, name, step=step)
+    lg.cexp.log_image(obj, name, step=step, kwargs...)
 end
+
 
 # AbstractLogger interface
 # Kind of mimicking TensorBoardLogger.jl
@@ -119,8 +140,6 @@ function preprocess(name, dict::AbstractDict, data)
     return data
 end
 
-#preprocess(name, val::PngImage, data) = push!(data, name=>val)
-
 # Split complex numbers into real/complex pairs
 preprocess(name, val::Complex, data) = push!(data, name*"/re"=>real(val), name*"/im"=>imag(val))
 
@@ -131,13 +150,10 @@ function preprocess(name, (x, y)::Tuple{AbstractVector,AbstractMatrix}, data)
     end
 end
 
-#function process(lg::CLogger, name::AbstractString, obj::PngImage, step::Int)
-    # TODO
-#end
 
 process(lg::CLogger, name::AbstractString, obj::Real, step::Int) = log_metric(lg, name, obj; step=step)
 process(lg::CLogger, name::AbstractString, obj::Tuple{AbstractVector,AbstractVector}, step::Int) = log_curve(lg, name, obj...; step=step)
-
+process(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}, step::Int) = log_image(lg, name, obj; step=step)
 
 
 function CoreLogging.handle_message(lg::CLogger, level, message, _module, group,

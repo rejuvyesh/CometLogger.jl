@@ -66,6 +66,12 @@ with_logger(lg) do
 end
 ```
 
+## Third-party packages
+We also support logging custom types from a the following third-party libraries:
+ - [Plots.jl](https://github.com/JuliaPlots/Plots.jl): the `Plots.Plot` type will be rendered to PNG at the resolution specified by the object and logged as an image
+
+!!! note
+    Make sure to load `Plots` and `ImageIO` if you wish to log `Plots.jl` plots.
 
 ## Explicit Interface
 
