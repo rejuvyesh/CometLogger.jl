@@ -1,5 +1,7 @@
 module CometLogger
 
+export CLogger
+
 using PyCall
 
 const comet = PyNULL()
@@ -139,10 +141,13 @@ function CoreLogging.handle_message(lg::CLogger, level, message, _module, group,
     end
 end
 
-Base.show(io::IO, tbl::CLogger) = begin
-	str  = "CLogger(\"$(tbl.cexp.project_name)\", min_level=$(tbl.min_level), "*
-		   "current_step=$(tbl.global_step))"
+Base.show(io::IO, cl::CLogger) = begin
+	str  = "CLogger(\"$(cl.cexp.project_name)\", min_level=$(cl.min_level), "*
+		   "current_step=$(cl.global_step))"*
+           "\n@ $(cl.cexp.url)"
     Base.print(io, str)
 end
+
+Base.close(cl::CLogger) = cl.cexp.end()
 
 end
