@@ -176,10 +176,10 @@ function CoreLogging.handle_message(lg::CLogger, level, message, _module, group,
             end
             preprocess(message*"/$key", val, data)
         end
-    end
-    iter = increment_step!(lg, i_step)
-    for (name, val) in data
-        process(lg, name, val, iter)
+        iter = increment_step!(lg, i_step)
+        for (name, val) in data
+            process(lg, name, val, iter)
+        end        
     end
 end
 
