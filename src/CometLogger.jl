@@ -4,6 +4,7 @@ module CometLogger
 using ColorTypes
 using PyCall
 using Requires
+using FileIO
 
 export CLogger
 
@@ -13,9 +14,10 @@ function __init__()
     copy!(comet, pyimport("comet_ml"))
 
     @require Plots="91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
-        @require ImageIO="82e4d734-157c-48bb-816b-45c225c6df19" begin    
-            include("plots.jl")
-        end
+        include("plots.jl")
+    end
+    @require ImageIO="82e4d734-157c-48bb-816b-45c225c6df19" begin    
+        include("image.jl")
     end
 end
 
@@ -73,16 +75,6 @@ function log_curve(lg::CLogger, name::AbstractString, x::AbstractVector, y::Abst
     lg.cexp.log_curve(name, x, y, overwrite=overwrite, step=step)
 end
 
-"""
-    function log_image(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}; step=nothing, kwargs...)
-
-Logs the image from an RGB array.
-"""
-function log_image(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}; step=nothing, kwargs...)
-    # TODO, handle grayscale?
-    arr = cat(red.(obj), green.(obj), blue.(obj); dims=3)
-    lg.cexp.log_image(arr, name, step=step, kwargs...)
-end
 
 """
     function log_image(lg::CLogger, name::AbstractString, obj::AbstractString; step=nothing, kwargs...)
@@ -157,7 +149,7 @@ end
 
 process(lg::CLogger, name::AbstractString, obj::Real, step::Int) = log_metric(lg, name, obj; step=step)
 process(lg::CLogger, name::AbstractString, obj::Tuple{AbstractVector,AbstractVector}, step::Int) = log_curve(lg, name, obj...; step=step)
-process(lg::CLogger, name::AbstractString, obj::AbstractArray{<:Colorant}, step::Int) = log_image(lg, name, obj; step=step, copy_to_tmp=false)
+
 
 
 function CoreLogging.handle_message(lg::CLogger, level, message, _module, group,
